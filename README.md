@@ -17,13 +17,19 @@ Without Firebase settings, the site runs on the starting content in `src/data/se
 
 Use the **Admin** link in the footer (or go to `/admin`) and sign in with Google. Only emails listed in `ADMIN_EMAILS` get in. While signed in, an **Admin** button also appears in the navbar.
 
-- **Events**: add, edit and delete events. Upcoming and past are split by date automatically.
+- **Events**: add, edit and delete events, including multi-day events (set an end date) and photos. Upcoming and past are split by date automatically; an event stays upcoming until its last day. Each event has its own page at `/events/<id>` with a photo gallery.
 - **Team**: add, edit, delete and reorder people. Leadership (organizers and faculty coordinator) plus each domain's lead, co-leads and coordinators. A domain with nobody in it is hidden on the public Team page.
 - **Stats**: the numbers on the Home page.
 
 The first time, the Team page offers **Import starting content**, which copies the current team and stats from `src/data/seed.ts` into Firebase.
 
 Changes appear on the public site immediately.
+
+### Event photos
+
+Event photos are uploaded in the admin panel and stored in **Vercel Blob** (store `gdsc-sit-photos`). Photos are resized in the browser (longest side 1920px, WebP) before uploading. The first photo is the cover and is used for link previews. Photos removed from an event, uploads from a cancelled edit, and the photos of a deleted event are deleted from storage automatically.
+
+For uploads to work locally, `BLOB_READ_WRITE_TOKEN` must be in `.env.local` (on Vercel it is set automatically).
 
 ### Team photos
 

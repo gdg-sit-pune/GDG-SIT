@@ -7,7 +7,7 @@ import { domainCountWord, domains } from '@/data/domains'
 import { site } from '@/data/site'
 import { accentAt, accents } from '@/lib/accents'
 import { autoStats, getEventGroups, getMembers, getStats } from '@/lib/content'
-import { dateParts } from '@/lib/dates'
+import { eventDateText } from '@/lib/dates'
 import { cell, cellGrid } from '@/lib/styles'
 import type { ClubEvent } from '@/lib/types'
 
@@ -30,16 +30,15 @@ function NextEventPanel({ next }: { next?: ClubEvent }) {
     )
   }
 
-  const d = dateParts(next.date)
   return (
-    <Link href="/events" className={panelClass}>
+    <Link href={`/events/${next.id}`} className={panelClass}>
       <div className="flex items-center justify-between">
         <Label tone="green">Next event</Label>
         <ArrowRight size={18} className="text-muted group-hover:translate-x-0.5 group-hover:text-fg" />
       </div>
       <p className="mt-4 text-xl font-medium tracking-tight">{next.title}</p>
       <p className="mt-1 text-sm text-muted">
-        {d.weekday}, {d.day} {d.month} {d.year} / {next.venue}
+        {eventDateText(next)} / {next.venue}
       </p>
     </Link>
   )
@@ -57,7 +56,7 @@ function StatValue({ value, index }: { value: string; index: number }) {
 }
 
 export default async function HomePage() {
-  const [{ upcoming }, savedStats, members] = await Promise.all([getEventGroups(), getStats(), getMembers()])
+  const [{ upcoming, today }, savedStats, members] = await Promise.all([getEventGroups(), getStats(), getMembers()])
   const stats = [...savedStats, ...autoStats(members)]
 
   return (
@@ -164,7 +163,7 @@ export default async function HomePage() {
           />
           <div className="mt-10 border-t border-line">
             {upcoming.length > 0 ? (
-              upcoming.slice(0, 3).map((e) => <EventRow key={e.id} event={e} />)
+              upcoming.slice(0, 3).map((e) => <EventRow key={e.id} event={e} today={today} />)
             ) : (
               <Reveal className="grid gap-4 border-b border-line py-12 lg:grid-cols-12 lg:gap-8">
                 <p className="text-2xl font-medium tracking-tight lg:col-span-5 lg:col-start-4">

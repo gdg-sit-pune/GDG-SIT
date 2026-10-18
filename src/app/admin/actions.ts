@@ -9,6 +9,7 @@ import { getAdmin, isAdminEmail } from '@/lib/auth'
 import { ADMIN_HINT_COOKIE, SESSION_COOKIE, SESSION_DAYS } from '@/lib/session-cookies'
 import { tags } from '@/lib/content'
 import { adminAuth, adminDb, firebaseConfigured } from '@/lib/firebase-admin'
+import { cleanPhotos, deletePhotos } from '@/lib/photos'
 import {
   domainRoles,
   eventModes,
@@ -16,6 +17,7 @@ import {
   isAutoStat,
   memberRoles,
   type ClubEvent,
+  type EventPhoto,
   type Member,
   type Stat,
 } from '@/lib/types'
@@ -88,15 +90,20 @@ function clean<T extends object>(obj: T): T {
 
 export type EventInput = Omit<ClubEvent, 'id'>
 
+const isoDate = /^\d{4}-\d{2}-\d{2}$/
+
 export async function saveEvent(input: EventInput, id?: string): Promise<ActionResult> {
   if (!(await getAdmin())) return notSignedIn
 
   const title = text(input.title, 120)
   const date = text(input.date, 10)
+  const endDate = text(input.endDate, 10)
   const venue = text(input.venue, 120)
   const description = text(input.description, 1000)
   if (!title) return fail('Add a title.')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return fail('Pick a date.')
+  if (!isoDate.test(date)) return fail('Pick a start date.')
+  if (endDate && !isoDate.test(endDate)) return fail('The end date is not valid.')
+  if (endDate && endDate < date) return fail("The end date can't be before the start date.")
   if (!venue) return fail('Add a venue.')
   if (!description) return fail('Add a short description.')
   if (!eventTypes.includes(input.type)) return fail('Pick an event type.')
@@ -107,9 +114,14 @@ export async function saveEvent(input: EventInput, id?: string): Promise<ActionR
   if (registrationUrl instanceof Error) return fail(registrationUrl.message)
   if (recapUrl instanceof Error) return fail(recapUrl.message)
 
+  const photos = cleanPhotos(input.photos)
+  if (typeof photos === 'string') return fail(photos)
+
   const event = clean({
     title,
     date,
+    // One-day events don't store an end date
+    endDate: endDate && endDate !== date ? endDate : undefined,
     time: text(input.time, 60) || undefined,
     venue,
     mode: input.mode,
@@ -117,19 +129,37 @@ export async function saveEvent(input: EventInput, id?: string): Promise<ActionR
     description,
     registrationUrl,
     recapUrl,
+    photos: photos.length ? photos : undefined,
   })
 
   const events = adminDb().collection('events')
-  if (id) await events.doc(id).set(event)
-  else await events.add(event)
+  if (id) {
+    const before = ((await events.doc(id).get()).data()?.photos as EventPhoto[] | undefined) ?? []
+    await events.doc(id).set(event)
+    // Photos taken out of the event are deleted from storage
+    const kept = new Set(photos.map((p) => p.url))
+    await deletePhotos(before.map((p) => p.url).filter((url) => !kept.has(url)))
+  } else {
+    await events.add(event)
+  }
   updateTag(tags.events)
   return { ok: true }
 }
 
 export async function deleteEvent(id: string): Promise<ActionResult> {
   if (!(await getAdmin())) return notSignedIn
-  await adminDb().collection('events').doc(id).delete()
+  const doc = adminDb().collection('events').doc(id)
+  const photos = ((await doc.get()).data()?.photos as EventPhoto[] | undefined) ?? []
+  await doc.delete()
+  await deletePhotos(photos.map((p) => p.url))
   updateTag(tags.events)
+  return { ok: true }
+}
+
+/** Deletes photos that were uploaded in the editor but never saved (e.g. the edit was cancelled). */
+export async function discardUploads(urls: string[]): Promise<ActionResult> {
+  if (!(await getAdmin())) return notSignedIn
+  if (Array.isArray(urls)) await deletePhotos(urls.slice(0, 100))
   return { ok: true }
 }
 

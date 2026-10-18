@@ -8,11 +8,20 @@ export type EventType = (typeof eventTypes)[number]
 export const eventModes = ['In-person', 'Online', 'Hybrid'] as const
 export type EventMode = (typeof eventModes)[number]
 
+export interface EventPhoto {
+  /** Public Vercel Blob URL */
+  url: string
+  width: number
+  height: number
+}
+
 export interface ClubEvent {
   id: string
   title: string
-  /** YYYY-MM-DD */
+  /** First day, YYYY-MM-DD */
   date: string
+  /** Last day for multi-day events, YYYY-MM-DD. Absent for one-day events. */
+  endDate?: string
   time?: string
   venue: string
   mode: EventMode
@@ -21,6 +30,8 @@ export interface ClubEvent {
   registrationUrl?: string
   /** Link to slides, photos or a recap post after the event */
   recapUrl?: string
+  /** Event photos; the first one is the cover */
+  photos?: EventPhoto[]
 }
 
 export const memberRoles = ['organizer', 'faculty', 'lead', 'colead', 'coordinator'] as const

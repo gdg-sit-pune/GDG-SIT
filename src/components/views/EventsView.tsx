@@ -9,7 +9,15 @@ import type { ClubEvent, EventType } from '@/lib/types'
 type Tab = 'upcoming' | 'past'
 
 /** Upcoming/past tabs, type filters and the event list. */
-export default function EventsView({ upcoming, past }: { upcoming: ClubEvent[]; past: ClubEvent[] }) {
+export default function EventsView({
+  upcoming,
+  past,
+  today,
+}: {
+  upcoming: ClubEvent[]
+  past: ClubEvent[]
+  today: string
+}) {
   const [tab, setTab] = useState<Tab>('upcoming')
   const [type, setType] = useState<EventType | 'All'>('All')
 
@@ -90,7 +98,7 @@ export default function EventsView({ upcoming, past }: { upcoming: ClubEvent[]; 
           {/* Keyed so the list fades in again when the tab or filter changes */}
           <div key={`${tab}-${type}`} className="animate-page-in">
             {shown.length > 0 ? (
-              shown.map((e) => <EventRow key={e.id} event={e} past={tab === 'past'} />)
+              shown.map((e) => <EventRow key={e.id} event={e} past={tab === 'past'} today={today} />)
             ) : (
               <p className="border-b border-line py-16 text-muted">
                 {tab === 'upcoming'
