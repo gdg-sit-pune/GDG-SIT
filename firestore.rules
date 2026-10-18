@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Browsers never read or write the database directly.
+// The website's server reads content with the Admin SDK (which bypasses these rules),
+// and every admin change goes through server code that checks the signed-in organizer.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

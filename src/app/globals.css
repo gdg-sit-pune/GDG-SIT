@@ -1,0 +1,165 @@
+@import 'tailwindcss';
+
+/* Dark mode is toggled by a `dark` class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Color tokens. Components use these (bg-bg, text-fg, border-line...) so light/dark
+   switching happens in one place. */
+:root {
+  /* Native controls (dropdown lists, date pickers, scrollbars) follow the theme */
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f6f7f8;
+  --fg: #1f1f1f;
+  --muted: #5f6368;
+  --line: #e2e3e5;
+  --line-strong: #c4c7c5;
+
+  /* Google colors tuned for text and icons on a light background */
+  --ink-blue: #1a73e8;
+  --ink-red: #d93025;
+  --ink-yellow: #f29900;
+  --ink-green: #1e8e3e;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0e0e0f;
+  --surface: #161618;
+  --fg: #ececec;
+  --muted: #9aa0a6;
+  --line: #27282b;
+  --line-strong: #3c3d41;
+
+  /* Google's softer dark-theme tones */
+  --ink-blue: #8ab4f8;
+  --ink-red: #f28b82;
+  --ink-yellow: #fdd663;
+  --ink-green: #81c995;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink-blue: var(--ink-blue);
+  --color-ink-red: var(--ink-red);
+  --color-ink-yellow: var(--ink-yellow);
+  --color-ink-green: var(--ink-green);
+
+  /* One typeface for the whole site: Google Sans, loaded by next/font in layout.tsx */
+  --font-sans: var(--font-google-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* Google brand colors */
+  --color-g-blue: #4285f4;
+  --color-g-red: #ea4335;
+  --color-g-yellow: #fbbc04;
+  --color-g-green: #34a853;
+
+  /* Every corner on the site is at most 2px */
+  --radius-xs: 2px;
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-up: fade-up 700ms var(--ease-soft) both;
+  --animate-page-in: page-in 350ms ease-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Shared timing for every element:
+   - color changes (theme switch, hovers) take 100ms everywhere
+   - movement (slides, rotations, opening and closing) takes 300ms with a soft ease */
+*,
+*::before,
+*::after {
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, translate,
+    scale, rotate, transform, grid-template-rows;
+  transition-duration: 100ms, 100ms, 100ms, 100ms, 100ms, 100ms, 100ms, 300ms, 300ms, 300ms, 300ms, 300ms, 350ms;
+  transition-timing-function:
+    ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, var(--ease-soft), var(--ease-soft),
+    var(--ease-soft), var(--ease-soft), var(--ease-soft), var(--ease-soft);
+}
+
+/* No transitions while the page first loads; removed in main.tsx after first paint */
+.preload *,
+.preload *::before,
+.preload *::after {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 100ms !important;
+  }
+}
+
+/* Theme switch: the new theme is revealed by an expanding circle (see useTheme.ts) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Smooth scrolling (Lenis) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+  }
+
+  /* Everything clickable gets the pointer cursor */
+  a[href],
+  button:not(:disabled),
+  summary,
+  select,
+  label:has(> input[type='checkbox']),
+  [role='button'],
+  [role='tab'] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+::selection {
+  background: var(--color-g-blue);
+  color: #fff;
+}
