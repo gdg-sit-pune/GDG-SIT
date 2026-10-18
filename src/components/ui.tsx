@@ -108,7 +108,7 @@ export function PageHeader({ title, subtitle }: { title: string; subtitle: strin
   return (
     <section className="border-b border-line">
       <Container className="pt-10 pb-12 lg:pt-14 lg:pb-16">
-        <h1 className="max-w-5xl text-5xl leading-[1.02] font-medium tracking-[-0.03em] sm:text-6xl lg:text-7xl">
+        <h1 className="max-w-5xl text-[2.6rem] leading-[1.05] font-medium tracking-[-0.03em] sm:text-6xl sm:leading-[1.02] lg:text-7xl">
           <Reveal as="span" className="block">
             {title}
           </Reveal>

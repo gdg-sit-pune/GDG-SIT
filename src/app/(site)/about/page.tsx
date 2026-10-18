@@ -125,7 +125,7 @@ export default function AboutPage() {
                   weight="light"
                   className={`${accents[accentAt(i)].text} group-hover:-translate-y-1`}
                 />
-                <h3 className="mt-12 text-3xl font-medium tracking-tight">{v.title}</h3>
+                <h3 className="mt-8 text-3xl font-medium tracking-tight sm:mt-12">{v.title}</h3>
                 <p className="mt-3 text-muted">{v.text}</p>
               </Reveal>
             ))}

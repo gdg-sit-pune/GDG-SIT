@@ -49,7 +49,7 @@ export default function StatsManager({ stats }: { stats: Stat[] }) {
           {items.map((stat, i) => (
             <li
               key={i}
-              className="grid grid-cols-[6rem_1fr_2.25rem] items-center gap-3 sm:grid-cols-[8rem_1fr_2.25rem] sm:gap-4"
+              className="grid grid-cols-[4.5rem_1fr_2.25rem] items-center gap-2 sm:grid-cols-[8rem_1fr_2.25rem] sm:gap-4"
             >
               <input
                 aria-label={`Stat ${i + 1} number`}

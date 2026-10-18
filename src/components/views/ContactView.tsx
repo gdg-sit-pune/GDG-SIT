@@ -118,7 +118,7 @@ export default function ContactView() {
             src={mapSrc}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="h-[420px] w-full rounded-xs border border-line grayscale"
+            className="h-72 w-full rounded-xs border border-line grayscale sm:h-[420px]"
           />
         </Container>
       </section>

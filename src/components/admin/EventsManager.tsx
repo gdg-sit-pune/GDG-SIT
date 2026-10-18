@@ -150,7 +150,7 @@ function EventList({
                   </p>
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{event.title}</p>
+                  <p className="font-medium sm:truncate">{event.title}</p>
                   <p className="truncate text-sm text-muted">
                     {event.type} · {event.venue}
                   </p>

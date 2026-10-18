@@ -68,13 +68,11 @@ export default async function HomePage() {
           <h1 className="text-[clamp(2.75rem,8.2vw,9rem)] leading-[0.95] font-medium tracking-[-0.04em]">
             <Reveal as="span" delay={60} className="block">
               Learn, <span className="text-ink-blue">build</span> and <span className="text-ink-green">grow</span>
-            </Reveal>
-            <Reveal as="span" delay={140} className="block">
-              with developers at SIT<span className="text-g-red">.</span>
+              <br className="hidden sm:inline" /> with developers at SIT<span className="text-g-red">.</span>
             </Reveal>
           </h1>
 
-          <div className="mt-14 grid gap-8 border-t border-line pt-8 lg:mt-20 lg:grid-cols-12">
+          <div className="mt-10 grid gap-8 border-t border-line pt-8 sm:mt-14 lg:mt-20 lg:grid-cols-12">
             <Reveal delay={220} className="lg:col-span-5">
               <p className="max-w-xl text-lg text-muted">
                 We&apos;re the GDG on Campus chapter at {site.college}. {domainCountWord} domains, from web development
@@ -135,7 +133,7 @@ export default async function HomePage() {
                     <d.icon size={32} weight="light" className={`${a.text} group-hover:-translate-y-1`} />
                     <span className="text-sm text-muted tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                   </div>
-                  <h3 className="mt-14 text-2xl font-medium tracking-tight">{d.name}</h3>
+                  <h3 className="mt-8 text-2xl font-medium tracking-tight sm:mt-14">{d.name}</h3>
                   <p className="mt-2 text-muted">{d.description}</p>
                 </Reveal>
               )
@@ -147,7 +145,7 @@ export default async function HomePage() {
                   weight="light"
                   className="text-muted group-hover:translate-x-1 group-hover:text-fg"
                 />
-                <h3 className="mt-14 text-2xl font-medium tracking-tight">Not sure where you fit?</h3>
+                <h3 className="mt-8 text-2xl font-medium tracking-tight sm:mt-14">Not sure where you fit?</h3>
                 <p className="mt-2 text-muted">Talk to us and we&apos;ll help you pick a domain.</p>
               </Link>
             </Reveal>

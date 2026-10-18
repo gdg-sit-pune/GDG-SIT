@@ -69,14 +69,14 @@ export default function EventsView({ upcoming, past }: { upcoming: ClubEvent[]; 
             </div>
 
             {list.length > 0 && (
-              <div className="flex flex-wrap gap-2 pb-3">
+              <div className="no-scrollbar -mx-4 flex w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 pb-3 sm:mx-0 sm:w-auto sm:flex-wrap sm:overflow-visible sm:px-0">
                 {types.map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setType(t)}
                     aria-pressed={type === t}
-                    className={`h-8 rounded-xs border px-3 text-sm active:scale-[0.97] ${
+                    className={`h-8 shrink-0 rounded-xs border px-3 text-sm whitespace-nowrap active:scale-[0.97] ${
                       type === t ? 'border-fg bg-fg text-bg' : 'border-line text-muted hover:border-fg hover:text-fg'
                     }`}
                   >

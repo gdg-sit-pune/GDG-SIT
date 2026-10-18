@@ -21,7 +21,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex h-9 items-center gap-2 rounded-xs border px-3 text-sm active:scale-[0.97] ${
+      className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-xs border px-3 text-sm whitespace-nowrap active:scale-[0.97] ${
         active ? 'border-fg bg-fg text-bg' : 'border-line text-muted hover:border-fg hover:text-fg'
       }`}
     >
@@ -52,7 +52,7 @@ export default function TeamView({ members }: { members: Member[] }) {
             />
             <div className="mt-12 lg:grid lg:grid-cols-12 lg:gap-8">
               {/* Same card size as the domain teams below */}
-              <Reveal className={`${cellGrid} grid-cols-1 sm:grid-cols-2 lg:col-span-9 lg:col-start-4 xl:grid-cols-4`}>
+              <Reveal className={`${cellGrid} grid-cols-2 md:grid-cols-3 lg:col-span-9 lg:col-start-4 xl:grid-cols-4`}>
                 {leadership.map((member, i) => (
                   <MemberCard key={member.id} member={member} accent={accentAt(i)} />
                 ))}
@@ -67,7 +67,7 @@ export default function TeamView({ members }: { members: Member[] }) {
           <Container>
             <SectionHeader index={leadership.length > 0 ? 2 : 1} label="Domains" title="Domain teams" />
 
-            <Reveal className="mt-10 flex flex-wrap gap-2 lg:ml-[25%]">
+            <Reveal className="no-scrollbar -mx-4 mt-10 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 lg:ml-[25%]">
               <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
                 All domains
               </FilterChip>
@@ -92,7 +92,7 @@ export default function TeamView({ members }: { members: Member[] }) {
                         {people.length} {people.length === 1 ? 'member' : 'members'}
                       </p>
                     </div>
-                    <div className={`${cellGrid} grid-cols-1 sm:grid-cols-2 lg:col-span-9 xl:grid-cols-4`}>
+                    <div className={`${cellGrid} grid-cols-2 md:grid-cols-3 lg:col-span-9 xl:grid-cols-4`}>
                       {people.map((member) => (
                         <MemberCard key={member.id} member={member} accent={accent} />
                       ))}

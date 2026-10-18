@@ -163,3 +163,11 @@ html.lenis body {
   background: var(--color-g-blue);
   color: #fff;
 }
+
+/* Horizontal scroll rows (e.g. filter buttons on phones) without a visible scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

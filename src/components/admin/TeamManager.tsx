@@ -238,7 +238,7 @@ export default function TeamManager({ members }: { members: Member[] }) {
                 return (
                   <li
                     key={m.id}
-                    className={`grid grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-line py-3 ${
+                    className={`grid grid-cols-[3rem_1fr] items-center gap-x-4 gap-y-1 border-b border-line py-3 sm:grid-cols-[3rem_1fr_auto] ${
                       busyId === m.id ? 'opacity-50' : ''
                     }`}
                   >
@@ -246,10 +246,10 @@ export default function TeamManager({ members }: { members: Member[] }) {
                       <MemberPhoto member={m} className="text-sm" />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate font-medium">{m.name}</p>
+                      <p className="font-medium sm:truncate">{m.name}</p>
                       <p className="truncate text-sm text-muted">{roleLabels[m.role]}</p>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="col-start-2 -ml-2 flex items-center gap-1 sm:col-start-auto sm:ml-0">
                       <IconButton
                         label="Move up"
                         disabled={index <= 0 || busyId !== null}

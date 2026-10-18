@@ -76,35 +76,33 @@ export default function MemberCard({ member, accent }: { member: Member; accent:
   ].filter((l) => l.href)
 
   return (
-    <div className={`${cell} group p-4 sm:p-5`}>
+    <div className={`${cell} group flex flex-col p-3 sm:p-4 lg:p-5`}>
       <div className="relative aspect-square overflow-hidden rounded-xs bg-surface">
-        <MemberPhoto member={member} className="text-5xl group-hover:scale-[1.03]" />
+        <MemberPhoto member={member} className="text-3xl group-hover:scale-[1.03] sm:text-5xl" />
         {/* Color line grows across on hover */}
         <span className={`absolute inset-x-0 bottom-0 h-1 origin-left scale-x-25 group-hover:scale-x-100 ${a.bg}`} />
       </div>
 
-      <div className="mt-5 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="text-lg font-medium">{member.name}</h3>
-          <p className={`mt-0.5 text-sm ${a.text}`}>{roleLabels[member.role]}</p>
-        </div>
-        {links.length > 0 && (
-          <div className="flex shrink-0 gap-1">
-            {links.map(({ href, label, Icon }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${member.name} on ${label}`}
-                className="grid size-8 place-items-center rounded-xs text-muted hover:bg-surface hover:text-fg active:scale-95"
-              >
-                <Icon size={18} />
-              </a>
-            ))}
-          </div>
-        )}
+      <div className="mt-3 min-w-0 sm:mt-4">
+        <h3 className="text-[15px] leading-snug font-medium sm:text-lg">{member.name}</h3>
+        <p className={`mt-0.5 text-[13px] sm:text-sm ${a.text}`}>{roleLabels[member.role]}</p>
       </div>
+      {links.length > 0 && (
+        <div className="mt-2 -ml-2 flex gap-0.5">
+          {links.map(({ href, label, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${member.name} on ${label}`}
+              className="grid size-9 place-items-center rounded-xs text-muted hover:bg-surface hover:text-fg active:scale-95"
+            >
+              <Icon size={18} />
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
