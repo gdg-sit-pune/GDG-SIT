@@ -1,30 +1,10 @@
 'use client'
 
-import { upload } from '@vercel/blob/client'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { CaretLeft, CaretRight, Close, Star, UploadSimple } from '@/components/icons'
+import { uploadPhoto } from '@/lib/image-upload'
 import type { EventPhoto } from '@/lib/types'
-
-const MAX_SIDE = 1920 // longest side after resizing, in pixels
-const QUALITY = 0.82
-
-/** Shrinks a photo in the browser and converts it to WebP before uploading. */
-async function resize(file: File): Promise<{ blob: Blob; width: number; height: number }> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height))
-  const width = Math.round(bitmap.width * scale)
-  const height = Math.round(bitmap.height * scale)
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, width, height)
-  bitmap.close()
-  const blob = await new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('encode failed'))), 'image/webp', QUALITY),
-  )
-  return { blob, width, height }
-}
 
 interface Uploading {
   id: number
@@ -62,15 +42,10 @@ export default function PhotoUploader({
     await Promise.all(
       queue.map(async ({ file, id }) => {
         try {
-          const { blob, width, height } = await resize(file)
-          const result = await upload(`events/${Date.now()}.webp`, blob, {
-            access: 'public',
-            contentType: 'image/webp',
-            handleUploadUrl: '/api/event-photos/upload',
-            onUploadProgress: ({ percentage }) =>
-              setUploading((u) => u.map((x) => (x.id === id ? { ...x, progress: percentage } : x))),
-          })
-          onAdd({ url: result.url, width, height })
+          const photo = await uploadPhoto(file, 'events', { maxSide: 1920 }, (progress) =>
+            setUploading((u) => u.map((x) => (x.id === id ? { ...x, progress } : x))),
+          )
+          onAdd(photo)
         } catch {
           setErrors((e) => [...e, `${file.name} couldn't be uploaded. Try a JPG or PNG under 10 MB.`])
         } finally {

@@ -1,8 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useState, useTransition } from 'react'
-import { deleteMember, importStartingContent, moveMember, saveMember, type MemberInput } from '@/app/admin/actions'
+import { useCallback, useRef, useState, useTransition } from 'react'
+import {
+  deleteMember,
+  discardUploads,
+  importStartingContent,
+  moveMember,
+  saveMember,
+  type MemberInput,
+} from '@/app/admin/actions'
 import { CaretDown, CaretUp, Pencil, Plus } from '@/components/icons'
 import { MemberPhoto } from '@/components/MemberCard'
 import { Label } from '@/components/ui'
@@ -11,6 +18,7 @@ import { accentAt, accents } from '@/lib/accents'
 import { buttonClass } from '@/lib/styles'
 import { domainRoles, memberRoles, roleLabels, type Member, type MemberRole } from '@/lib/types'
 import { AdminHeading, DeleteButton, Drawer, Field, FormMessage, IconButton, Select, TextInput } from './kit'
+import TeamPhotoField from './TeamPhotoField'
 
 const rank: Record<MemberRole, number> = { organizer: 0, faculty: 1, lead: 2, colead: 3, coordinator: 4 }
 const sortGroup = (a: Member, b: Member) => rank[a.role] - rank[b.role] || a.order - b.order
@@ -25,26 +33,42 @@ const toInput = (m: Member): MemberInput => ({
   instagram: m.instagram ?? '',
 })
 
-function MemberForm({ initial, id, onDone }: { initial: MemberInput; id?: string; onDone: () => void }) {
+function MemberForm({
+  initial,
+  id,
+  uploads,
+  onSaved,
+  onCancel,
+}: {
+  initial: MemberInput
+  id?: string
+  /** Photos uploaded during this edit; anything not saved gets deleted */
+  uploads: React.RefObject<Set<string>>
+  onSaved: () => void
+  onCancel: () => void
+}) {
   const [values, setValues] = useState(initial)
   const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [pending, startTransition] = useTransition()
   const set = (key: keyof MemberInput) => (e: { target: { value: string } }) =>
     setValues((v) => ({ ...v, [key]: e.target.value }))
   const needsDomain = domainRoles.includes(values.role)
-  const firstName =
-    values.name
-      .trim()
-      .split(/\s+/)
-      .find((p) => !/^(dr|prof|mr|mrs|ms)\.?$/i.test(p)) || 'Firstname'
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     startTransition(async () => {
       const result = await saveMember(values, id)
-      if (result.ok) onDone()
-      else setError(result.error)
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+      // Photos uploaded and then replaced before saving are no longer needed
+      const unused = [...uploads.current].filter((url) => url !== values.photo)
+      uploads.current.clear()
+      if (unused.length) void discardUploads(unused)
+      onSaved()
     })
   }
 
@@ -71,12 +95,13 @@ function MemberForm({ initial, id, onDone }: { initial: MemberInput; id?: string
           </Field>
         )}
       </div>
-      <Field
-        label="Photo"
-        hint={`Leave empty to use /team/${firstName}.png from the public folder. Or enter another path, e.g. /team/photo.jpg`}
-      >
-        <TextInput value={values.photo ?? ''} onChange={set('photo')} placeholder={`/team/${firstName}.png`} />
-      </Field>
+      <TeamPhotoField
+        name={values.name}
+        photo={values.photo ?? ''}
+        onChange={(photo) => setValues((v) => ({ ...v, photo }))}
+        onUploaded={(url) => uploads.current.add(url)}
+        onBusyChange={setUploading}
+      />
       <Field label="LinkedIn" hint="Optional">
         <TextInput
           type="url"
@@ -99,10 +124,10 @@ function MemberForm({ initial, id, onDone }: { initial: MemberInput; id?: string
 
       <FormMessage error={error} />
       <div className="flex gap-3 border-t border-line pt-5">
-        <button type="submit" disabled={pending} className={`${buttonClass()} disabled:opacity-60`}>
+        <button type="submit" disabled={pending || uploading} className={`${buttonClass()} disabled:opacity-60`}>
           {pending ? 'Saving…' : id ? 'Save changes' : 'Add person'}
         </button>
-        <button type="button" onClick={onDone} className={buttonClass('secondary')}>
+        <button type="button" onClick={onCancel} className={buttonClass('secondary')}>
           Cancel
         </button>
       </div>
@@ -172,13 +197,22 @@ export default function TeamManager({ members }: { members: Member[] }) {
     })),
   ]
 
+  const uploads = useRef(new Set<string>())
+
   const open = (target: { member?: Member; preset?: Partial<MemberInput> }) => {
+    uploads.current.clear()
     setFormKey((k) => k + 1)
     setEditing(target)
   }
-  const close = useCallback(() => setEditing(null), [])
-  const done = () => {
-    close()
+  // Closing without saving (Cancel, Escape or clicking outside) throws away photos uploaded meanwhile
+  const close = useCallback(() => {
+    const unsaved = [...uploads.current]
+    uploads.current.clear()
+    if (unsaved.length) void discardUploads(unsaved)
+    setEditing(null)
+  }, [])
+  const saved = () => {
+    setEditing(null)
     router.refresh()
   }
 
@@ -242,7 +276,7 @@ export default function TeamManager({ members }: { members: Member[] }) {
                       busyId === m.id ? 'opacity-50' : ''
                     }`}
                   >
-                    <div className="size-12 overflow-hidden rounded-xs bg-surface">
+                    <div className="relative size-12 overflow-hidden rounded-xs bg-surface">
                       <MemberPhoto member={m} className="text-sm" />
                     </div>
                     <div className="min-w-0">
@@ -278,7 +312,16 @@ export default function TeamManager({ members }: { members: Member[] }) {
       ))}
 
       <Drawer open={editing !== null} title={editing?.member ? 'Edit person' : 'New person'} onClose={close}>
-        {editing !== null && <MemberForm key={formKey} initial={initial} id={editing.member?.id} onDone={done} />}
+        {editing !== null && (
+          <MemberForm
+            key={formKey}
+            initial={initial}
+            id={editing.member?.id}
+            uploads={uploads}
+            onSaved={saved}
+            onCancel={close}
+          />
+        )}
       </Drawer>
     </>
   )

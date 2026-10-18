@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import Image from 'next/image'
 import { accents, type Accent } from '@/lib/accents'
 import { cell } from '@/lib/styles'
 import { roleLabels, type Member } from '@/lib/types'
 import { GithubLogo, InstagramLogo, LinkedinLogo } from './icons'
 
-// Titles like "Dr." are skipped for initials and photo filenames
+// Titles like "Dr." are skipped for initials
 const titles = new Set(['dr', 'prof', 'mr', 'mrs', 'ms'])
 const nameParts = (name: string) =>
   name
@@ -21,14 +21,7 @@ function initials(name: string) {
     .join('')
 }
 
-/** Photo files to try, in order: an explicit `photo`, then /team/<FirstName>.png, then lowercase. */
-function photoCandidates(member: Pick<Member, 'name' | 'photo'>): string[] {
-  if (member.photo) return [member.photo]
-  const first = nameParts(member.name)[0] ?? ''
-  return [...new Set([`/team/${first}.png`, `/team/${first.toLowerCase()}.png`])]
-}
-
-/** Square photo that falls back to initials when no file is found. */
+/** Square photo (uploaded in the admin panel), or initials when there isn't one. */
 export function MemberPhoto({
   member,
   className = '',
@@ -36,12 +29,8 @@ export function MemberPhoto({
   member: Pick<Member, 'name' | 'photo'>
   className?: string
 }) {
-  const candidates = photoCandidates(member)
-  const [attempt, setAttempt] = useState(0)
-  const photo = candidates[attempt]
-  // Move to the next candidate only once per failed file, even if both error checks fire
-  const fail = (src: string) => setAttempt((n) => (candidates[n] === src ? n + 1 : n))
-
+  // Only uploaded photos are shown; old file paths from before uploads existed count as no photo
+  const photo = member.photo?.startsWith('https://') ? member.photo : undefined
   if (!photo) {
     return (
       <span className={`grid size-full place-items-center font-medium tracking-tight text-muted ${className}`}>
@@ -50,19 +39,12 @@ export function MemberPhoto({
     )
   }
   return (
-    // A plain <img> so a missing file can fall back to the next name, then to initials
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      key={photo}
+    <Image
       src={photo}
       alt={member.name}
-      loading="lazy"
-      onError={() => fail(photo)}
-      // Catch a failure that happened before React attached onError
-      ref={(img) => {
-        if (img?.complete && img.naturalWidth === 0) fail(photo)
-      }}
-      className={`size-full object-cover ${className}`}
+      fill
+      sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 50vw"
+      className={`object-cover ${className}`}
     />
   )
 }

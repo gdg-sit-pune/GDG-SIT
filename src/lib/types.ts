@@ -56,7 +56,7 @@ export interface Member {
   domain?: DomainId
   /** Position within its group; lower comes first */
   order: number
-  /** Custom photo path. By default /team/<FirstName>.png is used. */
+  /** Square photo uploaded in the admin panel (Vercel Blob URL). Initials are shown without one. */
   photo?: string
   linkedin?: string
   github?: string

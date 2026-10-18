@@ -27,13 +27,15 @@ Changes appear on the public site immediately.
 
 ### Event photos
 
-Event photos are uploaded in the admin panel and stored in **Vercel Blob** (store `gdsc-sit-photos`). Photos are resized in the browser (longest side 1920px, WebP) before uploading. The first photo is the cover and is used for link previews. Photos removed from an event, uploads from a cancelled edit, and the photos of a deleted event are deleted from storage automatically.
+Event and team photos are uploaded in the admin panel and stored in **Vercel Blob** (store `gdsc-sit-photos`). Photos are resized in the browser (longest side 1920px, WebP) before uploading. The first photo is the cover and is used for link previews. Photos removed from an event, uploads from a cancelled edit, and the photos of a deleted event are deleted from storage automatically.
 
 For uploads to work locally, `BLOB_READ_WRITE_TOKEN` must be in `.env.local` (on Vercel it is set automatically).
 
 ### Team photos
 
-Photos live in `public/team/`, named by first name: `public/team/Rahil.png` (or `rahil.png`). Titles like "Dr." are skipped, so Dr. Rashmi Dharwadkar uses `Rashmi.png`. Anyone without a photo shows their initials. To use a different file for someone, set the Photo field in the admin panel (e.g. `/team/photo.jpg`).
+Team photos are uploaded in the admin panel too: open a person in **Team** and use **Upload photo**. The photo is cropped to a centered square and resized to 800×800 before uploading. People without a photo show their initials.
+
+Replaced or removed photos, and the photo of a deleted person, are deleted from storage. After every save, a background sweep also deletes any stored photo that no event or person uses and that is more than an hour old. It never runs against the local test database (emulators), because the photo store is shared with the live site.
 
 ## Setting up Firebase
 

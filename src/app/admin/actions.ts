@@ -2,6 +2,7 @@
 
 import { updateTag } from 'next/cache'
 import { cookies } from 'next/headers'
+import { after } from 'next/server'
 import { redirect } from 'next/navigation'
 import { domains, type DomainId } from '@/data/domains'
 import { seedMembers, seedStats } from '@/data/seed'
@@ -9,7 +10,7 @@ import { getAdmin, isAdminEmail } from '@/lib/auth'
 import { ADMIN_HINT_COOKIE, SESSION_COOKIE, SESSION_DAYS } from '@/lib/session-cookies'
 import { tags } from '@/lib/content'
 import { adminAuth, adminDb, firebaseConfigured } from '@/lib/firebase-admin'
-import { cleanPhotos, deletePhotos } from '@/lib/photos'
+import { cleanPhotos, deleteOrphanPhotos, deletePhotos, isBlobUrl } from '@/lib/photos'
 import {
   domainRoles,
   eventModes,
@@ -143,6 +144,8 @@ export async function saveEvent(input: EventInput, id?: string): Promise<ActionR
     await events.add(event)
   }
   updateTag(tags.events)
+  // Sweep up any photos left behind by unsaved edits
+  after(deleteOrphanPhotos)
   return { ok: true }
 }
 
@@ -178,8 +181,9 @@ export async function saveMember(input: MemberInput, id?: string): Promise<Actio
   const needsDomain = domainRoles.includes(input.role)
   if (needsDomain && !isDomain(input.domain)) return fail('Pick a domain for this role.')
 
-  const photo = text(input.photo, 200)
-  if (photo && !photo.startsWith('/')) return fail('Photo path should start with /team/, e.g. /team/Rahil.png')
+  // Only uploaded photos are kept; anything else (like an old /team/ path) counts as no photo
+  const rawPhoto = text(input.photo, 500)
+  const photo = isBlobUrl(rawPhoto) ? rawPhoto : ''
 
   const links = {
     linkedin: optionalUrl(input.linkedin, 'LinkedIn link'),
@@ -198,8 +202,11 @@ export async function saveMember(input: MemberInput, id?: string): Promise<Actio
   })
 
   if (id) {
-    const existing = await members.doc(id).get()
-    await members.doc(id).set({ ...data, order: existing.data()?.order ?? Date.now() })
+    const existing = (await members.doc(id).get()).data()
+    await members.doc(id).set({ ...data, order: existing?.order ?? Date.now() })
+    // A replaced or removed photo is deleted from storage
+    const oldPhoto = existing?.photo as string | undefined
+    if (oldPhoto && oldPhoto !== photo) await deletePhotos([oldPhoto])
   } else {
     // New people go to the end of their group
     const last = await members.orderBy('order', 'desc').limit(1).get()
@@ -207,12 +214,17 @@ export async function saveMember(input: MemberInput, id?: string): Promise<Actio
     await members.add({ ...data, order })
   }
   updateTag(tags.members)
+  // Sweep up any photos left behind by unsaved edits
+  after(deleteOrphanPhotos)
   return { ok: true }
 }
 
 export async function deleteMember(id: string): Promise<ActionResult> {
   if (!(await getAdmin())) return notSignedIn
-  await adminDb().collection('members').doc(id).delete()
+  const doc = adminDb().collection('members').doc(id)
+  const photo = (await doc.get()).data()?.photo as string | undefined
+  await doc.delete()
+  if (photo) await deletePhotos([photo])
   updateTag(tags.members)
   return { ok: true }
 }
