@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { navLinks, site } from '@/data/site'
 import { useTheme } from '@/hooks/useTheme'
 import { accentAt, accents } from '@/lib/accents'
+import { ADMIN_HINT_COOKIE } from '@/lib/session-cookies'
 import { ArrowRight, Close, MenuIcon, Moon, Sun } from './icons'
 import Logo from './Logo'
 import { Collapse, IconSwap } from './motion'
@@ -13,6 +14,18 @@ import { ButtonLink, Container } from './ui'
 
 const iconButton =
   'grid size-9 place-items-center rounded-xs border border-line text-fg hover:border-fg active:scale-95 focus-visible:outline-2 focus-visible:outline-g-blue'
+
+/** True when an organizer is signed in (from a readable hint cookie; access is still checked on the server). */
+function useSignedInAdmin() {
+  return useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener('focus', onChange)
+      return () => window.removeEventListener('focus', onChange)
+    },
+    () => document.cookie.split('; ').includes(`${ADMIN_HINT_COOKIE}=1`),
+    () => false,
+  )
+}
 
 const isActive = (pathname: string, href: string) =>
   href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
@@ -38,6 +51,7 @@ export function ThemeToggle() {
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const signedIn = useSignedInAdmin()
   const close = () => setOpen(false)
 
   return (
@@ -71,6 +85,13 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {signedIn && (
+              <div className="hidden md:block">
+                <ButtonLink to="/admin/events" size="sm" variant="secondary">
+                  Admin
+                </ButtonLink>
+              </div>
+            )}
             <ThemeToggle />
             <div className="hidden lg:block">
               <ButtonLink href={site.communityUrl} size="sm" icon="external">
@@ -118,6 +139,16 @@ export default function Navbar() {
                   </Link>
                 )
               })}
+              {signedIn && (
+                <Link
+                  href="/admin/events"
+                  onClick={close}
+                  className="group flex items-center justify-between border-b border-line py-4 text-lg text-muted"
+                >
+                  <span className="pl-[0.875rem]">Admin</span>
+                  <ArrowRight size={18} className="group-hover:translate-x-0.5" />
+                </Link>
+              )}
               <ButtonLink href={site.communityUrl} icon="external" className="mt-4 w-full">
                 Join the chapter
               </ButtonLink>

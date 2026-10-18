@@ -5,7 +5,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { domains, type DomainId } from '@/data/domains'
 import { seedMembers, seedStats } from '@/data/seed'
-import { getAdmin, isAdminEmail, SESSION_COOKIE, SESSION_DAYS } from '@/lib/auth'
+import { getAdmin, isAdminEmail } from '@/lib/auth'
+import { ADMIN_HINT_COOKIE, SESSION_COOKIE, SESSION_DAYS } from '@/lib/session-cookies'
 import { tags } from '@/lib/content'
 import { adminAuth, adminDb, firebaseConfigured } from '@/lib/firebase-admin'
 import {
@@ -39,13 +40,16 @@ export async function startSession(idToken: string): Promise<ActionResult> {
 
     const expiresIn = SESSION_DAYS * 24 * 60 * 60 * 1000
     const session = await adminAuth().createSessionCookie(idToken, { expiresIn })
-    ;(await cookies()).set(SESSION_COOKIE, session, {
-      httpOnly: true,
+    const jar = await cookies()
+    const options = {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
       maxAge: expiresIn / 1000,
-    })
+    }
+    jar.set(SESSION_COOKIE, session, { ...options, httpOnly: true })
+    // Readable by the page so the navbar can show an "Admin" button; grants no access
+    jar.set(ADMIN_HINT_COOKIE, '1', options)
     return { ok: true }
   } catch {
     return fail('Sign-in could not be verified. Please try again.')
@@ -53,7 +57,9 @@ export async function startSession(idToken: string): Promise<ActionResult> {
 }
 
 export async function signOutAction() {
-  ;(await cookies()).delete(SESSION_COOKIE)
+  const jar = await cookies()
+  jar.delete(SESSION_COOKIE)
+  jar.delete(ADMIN_HINT_COOKIE)
   redirect('/admin/login')
 }
 

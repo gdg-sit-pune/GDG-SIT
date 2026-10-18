@@ -15,7 +15,7 @@ Without Firebase settings, the site runs on the starting content in `src/data/se
 
 ## Admin panel
 
-Go to `/admin` and sign in with Google. Only emails listed in `ADMIN_EMAILS` get in.
+Use the **Admin** link in the footer (or go to `/admin`) and sign in with Google. Only emails listed in `ADMIN_EMAILS` get in. While signed in, an **Admin** button also appears in the navbar.
 
 - **Events**: add, edit and delete events. Upcoming and past are split by date automatically.
 - **Team**: add, edit, delete and reorder people. Leadership (organizers and faculty coordinator) plus each domain's lead, co-leads and coordinators. A domain with nobody in it is hidden on the public Team page.

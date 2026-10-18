@@ -53,6 +53,12 @@ export default function Footer() {
       <Container className="flex flex-col gap-2 border-t border-line py-6 text-xs text-muted sm:flex-row sm:justify-between">
         <p>
           © <CurrentYear /> {site.shortName}
+          <span className="mx-2" aria-hidden="true">
+            ·
+          </span>
+          <Link href="/admin/events" className="hover:text-fg">
+            Admin
+          </Link>
         </p>
         <p>Google Developer Groups on Campus is a program supported by Google for Developers.</p>
       </Container>
