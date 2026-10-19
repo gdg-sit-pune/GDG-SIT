@@ -99,15 +99,17 @@ export default function AboutPage() {
                 students interested in Google developer technologies. The program was previously called Google Developer
                 Student Clubs (GDSC).
               </p>
-              <a
-                href={site.communityUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="group mt-6 inline-flex items-center gap-2 text-sm font-medium hover:text-ink-blue"
-              >
-                GDG community platform
-                <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </a>
+              {site.communityUrl && (
+                <a
+                  href={site.communityUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group mt-6 inline-flex items-center gap-2 text-sm font-medium hover:text-ink-blue"
+                >
+                  GDG community platform
+                  <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              )}
             </Reveal>
           </div>
         </Container>

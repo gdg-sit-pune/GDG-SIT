@@ -14,6 +14,16 @@ import type { ClubEvent } from '@/lib/types'
 const panelClass = 'group block h-full rounded-xs border border-line p-5 hover:border-fg'
 
 function NextEventPanel({ next }: { next?: ClubEvent }) {
+  if (!next && !site.communityUrl) {
+    return (
+      <div className="h-full rounded-xs border border-line p-5">
+        <Label tone="green">Next event</Label>
+        <p className="mt-4 text-xl font-medium tracking-tight">Announcing soon</p>
+        <p className="mt-1 text-sm text-muted">Follow us on social media to hear about it first.</p>
+      </div>
+    )
+  }
+
   if (!next) {
     return (
       <a href={site.communityUrl} target="_blank" rel="noreferrer" className={panelClass}>
@@ -86,10 +96,12 @@ export default async function HomePage() {
               </p>
             </Reveal>
             <Reveal delay={280} className="flex flex-wrap items-start gap-3 lg:col-span-3">
-              <ButtonLink href={site.communityUrl} icon="external">
-                Join the chapter
-              </ButtonLink>
-              <ButtonLink to="/about" variant="secondary">
+              {site.communityUrl && (
+                <ButtonLink href={site.communityUrl} icon="external">
+                  Join the chapter
+                </ButtonLink>
+              )}
+              <ButtonLink to="/about" variant={site.communityUrl ? 'secondary' : 'primary'}>
                 About us
               </ButtonLink>
             </Reveal>
@@ -176,8 +188,8 @@ export default async function HomePage() {
                   New events are on the way.
                 </p>
                 <p className="text-muted lg:col-span-4">
-                  Join the chapter or follow us on social media to hear about workshops, contests and hackathons as soon
-                  as they&apos;re announced.
+                  {site.communityUrl ? 'Join the chapter or follow' : 'Follow'} us on social media to hear about
+                  workshops, contests and hackathons as soon as they&apos;re announced.
                 </p>
               </Reveal>
             )}
@@ -190,13 +202,20 @@ export default async function HomePage() {
         <Container className="grid gap-8 py-16 lg:grid-cols-12 lg:items-end lg:py-24">
           <Reveal className="lg:col-span-8">
             <h2 className="text-4xl font-medium tracking-tight sm:text-5xl lg:text-6xl">
-              Ready to start building? Join the chapter. It&apos;s free, and no experience is needed.
+              Ready to start building? {site.communityUrl ? 'Join the chapter' : 'Get in touch'}. It&apos;s free, and no
+              experience is needed.
             </h2>
           </Reveal>
           <div className="lg:col-span-4 lg:flex lg:justify-end">
-            <ButtonLink href={site.communityUrl} icon="external">
-              Become a member
-            </ButtonLink>
+            {site.communityUrl ? (
+              <ButtonLink href={site.communityUrl} icon="external">
+                Become a member
+              </ButtonLink>
+            ) : (
+              <ButtonLink to="/contact" icon="arrow">
+                Get in touch
+              </ButtonLink>
+            )}
           </div>
         </Container>
       </section>

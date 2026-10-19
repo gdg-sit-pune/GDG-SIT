@@ -50,22 +50,24 @@ export default function ContactView() {
                 </dt>
                 <dd className="mt-2 text-lg">{site.address}</dd>
               </div>
-              <div className="border-b border-line py-5">
-                <dt>
-                  <Label tone="yellow">Community page</Label>
-                </dt>
-                <dd className="mt-2">
-                  <a
-                    href={site.communityUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group inline-flex items-center gap-2 text-lg hover:text-ink-blue"
-                  >
-                    Join the chapter for event updates
-                    <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </a>
-                </dd>
-              </div>
+              {site.communityUrl && (
+                <div className="border-b border-line py-5">
+                  <dt>
+                    <Label tone="yellow">Community page</Label>
+                  </dt>
+                  <dd className="mt-2">
+                    <a
+                      href={site.communityUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group inline-flex items-center gap-2 text-lg hover:text-ink-blue"
+                    >
+                      Join the chapter for event updates
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </a>
+                  </dd>
+                </div>
+              )}
             </dl>
             <div className="mt-8">
               <Label tone="green">Follow us</Label>

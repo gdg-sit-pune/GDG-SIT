@@ -93,11 +93,13 @@ export default function Navbar() {
               </div>
             )}
             <ThemeToggle />
-            <div className="hidden lg:block">
-              <ButtonLink href={site.communityUrl} size="sm" icon="external">
-                Join the chapter
-              </ButtonLink>
-            </div>
+            {site.communityUrl && (
+              <div className="hidden lg:block">
+                <ButtonLink href={site.communityUrl} size="sm" icon="external">
+                  Join the chapter
+                </ButtonLink>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setOpen((o) => !o)}
@@ -149,9 +151,11 @@ export default function Navbar() {
                   <ArrowRight size={18} className="group-hover:translate-x-0.5" />
                 </Link>
               )}
-              <ButtonLink href={site.communityUrl} icon="external" className="mt-4 w-full">
-                Join the chapter
-              </ButtonLink>
+              {site.communityUrl && (
+                <ButtonLink href={site.communityUrl} icon="external" className="mt-4 w-full">
+                  Join the chapter
+                </ButtonLink>
+              )}
             </Container>
           </nav>
         </Collapse>
