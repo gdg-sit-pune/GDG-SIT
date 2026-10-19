@@ -56,7 +56,13 @@ function StatValue({ value, index }: { value: string; index: number }) {
 }
 
 export default async function HomePage() {
-  const [{ upcoming, today }, savedStats, members] = await Promise.all([getEventGroups(), getStats(), getMembers()])
+  const [{ ongoing, upcoming: notStarted, today }, savedStats, members] = await Promise.all([
+    getEventGroups(),
+    getStats(),
+    getMembers(),
+  ])
+  // Events happening now stay in front on the Home page
+  const upcoming = [...ongoing, ...notStarted]
   const stats = [...savedStats, ...autoStats(members)]
 
   return (

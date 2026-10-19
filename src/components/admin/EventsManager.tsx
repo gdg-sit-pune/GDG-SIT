@@ -5,7 +5,7 @@ import { useCallback, useRef, useState, useTransition } from 'react'
 import { deleteEvent, discardUploads, saveEvent, type EventInput } from '@/app/admin/actions'
 import { Images, Pencil, Plus } from '@/components/icons'
 import { Label } from '@/components/ui'
-import { eventDateBlock, eventEnd } from '@/lib/dates'
+import { eventDateBlock, eventEnd, isOngoing } from '@/lib/dates'
 import { buttonClass } from '@/lib/styles'
 import { eventModes, eventTypes, type ClubEvent, type EventPhoto } from '@/lib/types'
 import { AdminHeading, DeleteButton, Drawer, Field, FormMessage, IconButton, Select, TextArea, TextInput } from './kit'
@@ -235,8 +235,9 @@ export default function EventsManager({ events, today }: { events: ClubEvent[]; 
   const [error, setError] = useState<string | null>(null)
   const uploads = useRef(new Set<string>())
 
-  // Multi-day events stay upcoming until their last day is over
-  const upcoming = events.filter((e) => eventEnd(e) >= today).sort((a, b) => a.date.localeCompare(b.date))
+  // Multi-day events are ongoing from their first day until their last day is over
+  const ongoing = events.filter((e) => isOngoing(e, today)).sort((a, b) => eventEnd(a).localeCompare(eventEnd(b)))
+  const upcoming = events.filter((e) => e.date > today).sort((a, b) => a.date.localeCompare(b.date))
   const past = events.filter((e) => eventEnd(e) < today)
 
   const open = (target: ClubEvent | 'new') => {
@@ -271,7 +272,7 @@ export default function EventsManager({ events, today }: { events: ClubEvent[]; 
     <>
       <AdminHeading
         title="Events"
-        subtitle="Upcoming events show on the Home and Events pages. They move to Past after their last day."
+        subtitle="Upcoming events show on the Home and Events pages. They become Ongoing on their first day and move to Past after their last day."
         action={
           <button type="button" onClick={() => open('new')} className={buttonClass()}>
             <Plus size={16} /> Add event
@@ -281,6 +282,9 @@ export default function EventsManager({ events, today }: { events: ClubEvent[]; 
       <div className="mt-4">
         <FormMessage error={error} />
       </div>
+      {ongoing.length > 0 && (
+        <EventList title="Ongoing" events={ongoing} onEdit={open} onDelete={remove} busyId={busyId} />
+      )}
       <EventList title="Upcoming" events={upcoming} onEdit={open} onDelete={remove} busyId={busyId} />
       <EventList title="Past" events={past} onEdit={open} onDelete={remove} busyId={busyId} />
 

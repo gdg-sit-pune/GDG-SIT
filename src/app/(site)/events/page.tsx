@@ -9,14 +9,14 @@ export const metadata: Metadata = {
 }
 
 export default async function EventsPage() {
-  const { upcoming, past, today } = await getEventGroups()
+  const { ongoing, upcoming, past, today } = await getEventGroups()
   return (
     <>
       <PageHeader
         title="Workshops, hackathons and more."
         subtitle="See what's coming up and catch up on what you missed. Most events are free and open to every student."
       />
-      <EventsView upcoming={upcoming} past={past} today={today} />
+      <EventsView ongoing={ongoing} upcoming={upcoming} past={past} today={today} />
     </>
   )
 }

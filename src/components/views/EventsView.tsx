@@ -6,27 +6,30 @@ import { Reveal } from '@/components/motion'
 import { Container } from '@/components/ui'
 import type { ClubEvent, EventType } from '@/lib/types'
 
-type Tab = 'upcoming' | 'past'
+type Tab = 'ongoing' | 'upcoming' | 'past'
 
-/** Upcoming/past tabs, type filters and the event list. */
+/** Upcoming/ongoing/past tabs, type filters and the event list. */
 export default function EventsView({
+  ongoing,
   upcoming,
   past,
   today,
 }: {
+  ongoing: ClubEvent[]
   upcoming: ClubEvent[]
   past: ClubEvent[]
   today: string
 }) {
-  const [tab, setTab] = useState<Tab>('upcoming')
+  const [tab, setTab] = useState<Tab>(ongoing.length > 0 ? 'ongoing' : 'upcoming')
   const [type, setType] = useState<EventType | 'All'>('All')
 
-  const list = tab === 'upcoming' ? upcoming : past
+  const list = { ongoing, upcoming, past }[tab]
   const types: (EventType | 'All')[] = ['All', ...new Set(list.map((e) => e.type))]
   const shown = type === 'All' ? list : list.filter((e) => e.type === type)
 
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: 'upcoming', label: 'Upcoming', count: upcoming.length },
+    { id: 'ongoing', label: 'Ongoing', count: ongoing.length },
     { id: 'past', label: 'Past', count: past.length },
   ]
 
@@ -103,7 +106,9 @@ export default function EventsView({
               <p className="border-b border-line py-16 text-muted">
                 {tab === 'upcoming'
                   ? 'No upcoming events yet. Check back soon or follow us on social media.'
-                  : 'No past events to show yet.'}
+                  : tab === 'ongoing'
+                    ? 'Nothing is happening right now. Check the Upcoming tab for what is next.'
+                    : 'No past events to show yet.'}
               </p>
             )}
           </div>

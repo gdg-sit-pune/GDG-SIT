@@ -1,7 +1,7 @@
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
 import { seedEvents, seedMembers, seedStats } from '@/data/seed'
-import { eventEnd, todayInIndia } from './dates'
+import { eventEnd, isOngoing, todayInIndia } from './dates'
 import { adminDb, firebaseConfigured } from './firebase-admin'
 import { domains } from '@/data/domains'
 import { isAutoStat, type ClubEvent, type Member, type Stat } from './types'
@@ -30,17 +30,23 @@ export async function getEvents(): Promise<ClubEvent[]> {
 }
 
 /**
- * Events split into upcoming (soonest first) and past (latest first). A multi-day event stays
- * upcoming until its last day is over. `today` is the date the split was made (India time).
+ * Events split into ongoing (started, last day not over yet), upcoming (soonest first) and past
+ * (latest first). `today` is the date the split was made (India time).
  */
-export async function getEventGroups(): Promise<{ upcoming: ClubEvent[]; past: ClubEvent[]; today: string }> {
+export async function getEventGroups(): Promise<{
+  ongoing: ClubEvent[]
+  upcoming: ClubEvent[]
+  past: ClubEvent[]
+  today: string
+}> {
   'use cache'
   cacheLife('hours')
   cacheTag(tags.events)
   const events = await getEvents()
   const today = todayInIndia(new Date())
   return {
-    upcoming: events.filter((e) => eventEnd(e) >= today).sort((a, b) => a.date.localeCompare(b.date)),
+    ongoing: events.filter((e) => isOngoing(e, today)).sort((a, b) => eventEnd(a).localeCompare(eventEnd(b))),
+    upcoming: events.filter((e) => e.date > today).sort((a, b) => a.date.localeCompare(b.date)),
     past: events.filter((e) => eventEnd(e) < today).sort((a, b) => eventEnd(b).localeCompare(eventEnd(a))),
     today,
   }
