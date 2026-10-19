@@ -25,7 +25,8 @@ export const site = {
   socials: {
     instagram: 'https://www.instagram.com/gdsc.sitpune/',
     linkedin: 'https://www.linkedin.com/company/gdsc-sit-pune/',
-    github: '',
+    githubOrg: 'https://github.com/gdg-sit-pune',
+    github: 'https://github.com/gdg-sit',
     x: '',
   },
 }
