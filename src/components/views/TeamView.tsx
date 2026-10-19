@@ -33,7 +33,12 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 export default function TeamView({ members }: { members: Member[] }) {
   const [filter, setFilter] = useState<DomainId | 'all'>('all')
 
-  const leadership = members.filter((m) => m.role === 'organizer' || m.role === 'faculty').sort(byRoleThenOrder)
+  // Faculty coordinator first, then the organizers, each in their own row
+  const byOrder = (a: Member, b: Member) => a.order - b.order
+  const leadership = [
+    { label: 'Faculty coordinator', people: members.filter((m) => m.role === 'faculty').sort(byOrder) },
+    { label: 'Organizers', people: members.filter((m) => m.role === 'organizer').sort(byOrder) },
+  ].filter((row) => row.people.length > 0)
   const teams = domains
     .map((d) => ({ domain: d, people: members.filter((m) => m.domain === d.id).sort(byRoleThenOrder) }))
     .filter((t) => t.people.length > 0)
@@ -50,13 +55,18 @@ export default function TeamView({ members }: { members: Member[] }) {
               title="Leadership"
               description="Two student organizers run the chapter, supported by our faculty coordinator."
             />
-            <div className="mt-12 lg:grid lg:grid-cols-12 lg:gap-8">
-              {/* Same card size as the domain teams below */}
-              <Reveal className={`${cellGrid} grid-cols-2 md:grid-cols-3 lg:col-span-9 lg:col-start-4 xl:grid-cols-4`}>
-                {leadership.map((member, i) => (
-                  <MemberCard key={member.id} member={member} accent={accentAt(i)} />
-                ))}
-              </Reveal>
+            <div className="mt-12">
+              {leadership.map(({ label, people }, row) => (
+                <Reveal key={label} className="grid gap-6 border-t border-line py-10 lg:grid-cols-12 lg:gap-8">
+                  <h3 className="text-2xl font-medium tracking-tight lg:col-span-3">{label}</h3>
+                  {/* Same card size as the domain teams below */}
+                  <div className={`${cellGrid} grid-cols-2 md:grid-cols-3 lg:col-span-9 xl:grid-cols-4`}>
+                    {people.map((member, i) => (
+                      <MemberCard key={member.id} member={member} accent={accentAt(row + i)} />
+                    ))}
+                  </div>
+                </Reveal>
+              ))}
             </div>
           </Container>
         </section>
