@@ -3,6 +3,7 @@ import { Google_Sans } from 'next/font/google'
 import { TransitionsReady } from '@/components/ClientEffects'
 import { domainCountWord } from '@/data/domains'
 import { site } from '@/data/site'
+import { siteUrl } from '@/lib/site-url'
 import './globals.css'
 
 const googleSans = Google_Sans({
@@ -11,14 +12,6 @@ const googleSans = Google_Sans({
   variable: '--font-google-sans',
   display: 'swap',
 })
-
-// Used for absolute links in previews (Open Graph). Set NEXT_PUBLIC_SITE_URL once the site has a domain.
-// `||` (not `??`) so an empty value in .env falls through to the default
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
 
 const description = `${site.fullName} at ${site.college}, ${site.city}. ${domainCountWord} domains, from web development to design, and one community of student developers.`
 
