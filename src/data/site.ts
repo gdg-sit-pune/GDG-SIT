@@ -24,8 +24,8 @@ export const site = {
 
   // Leave a link empty ('') to hide that icon
   socials: {
-    instagram: 'https://www.instagram.com/gdsc.sitpune/',
-    linkedin: 'https://www.linkedin.com/company/gdsc-sit-pune/',
+    instagram: 'https://www.instagram.com/gdg.sitpune/',
+    linkedin: 'https://www.linkedin.com/in/google-developer-groups-on-campus-sit-pune/',
     githubOrg: 'https://github.com/gdg-sit-pune',
     github: 'https://github.com/gdg-sit',
     x: '',

@@ -58,10 +58,6 @@ const faqs = [
     q: 'How do I join the core team?',
     a: 'We open core team applications at the start of each academic year. Follow our social media or contact us to hear when they open.',
   },
-  {
-    q: 'What happened to GDSC?',
-    a: 'In 2024, Google Developer Student Clubs was renamed Google Developer Groups on Campus. Same community, new name.',
-  },
 ]
 
 export const metadata: Metadata = {
@@ -96,8 +92,7 @@ export default function AboutPage() {
               <Label tone="blue">The program</Label>
               <p className="mt-4">
                 Google Developer Groups on Campus are university groups, supported by Google for Developers, for
-                students interested in Google developer technologies. The program was previously called Google Developer
-                Student Clubs (GDSC).
+                students interested in Google developer technologies.
               </p>
               {site.communityUrl && (
                 <a
